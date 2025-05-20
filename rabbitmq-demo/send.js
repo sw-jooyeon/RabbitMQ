@@ -1,18 +1,28 @@
-// send.js
-import amqp from 'amqplib';
+#!/usr/bin/env node
 
-const queue = 'hello';
+var amqp = require('amqplib/callback_api');
 
-const send = async () => {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
+amqp.connect('amqp://localhost', function(error0, connection) {
+    if (error0) {
+        throw error0;
+    }
+    connection.createChannel(function(error1, channel) {
+        if (error1) {
+            throw error1;
+        }
 
-  await channel.assertQueue(queue, { durable: false });
-  channel.sendToQueue(queue, Buffer.from('안녕하세요 RabbitMQ!'));
+        var queue = 'hello';
+        var msg = 'Hello World!';
 
-  console.log(`[x] Sent message`);
-  await channel.close();
-  await connection.close();
-};
+        channel.assertQueue(queue, {
+            durable: false
+        });
+        channel.sendToQueue(queue, Buffer.from(msg));
 
-send().catch(console.error);
+        console.log(" [x] Sent %s", msg);
+    });
+    setTimeout(function() {
+        connection.close();
+        process.exit(0);
+    }, 500);
+});

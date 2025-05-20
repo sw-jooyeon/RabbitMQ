@@ -1,20 +1,28 @@
-// receive.js
-import amqp from 'amqplib';
+#!/usr/bin/env node
 
-const queue = 'hello';
+var amqp = require('amqplib/callback_api');
 
-const receive = async () => {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
-
-  await channel.assertQueue(queue, { durable: false });
-
-  console.log(`[x] Waiting for messages in ${queue}`);
-  channel.consume(queue, (msg) => {
-    if (msg !== null) {
-      console.log(`[x] Received: ${msg.content.toString()}`);
+amqp.connect('amqp://localhost', function(error0, connection) {
+    if (error0) {
+        throw error0;
     }
-  }, { noAck: true });
-};
+    connection.createChannel(function(error1, channel) {
+        if (error1) {
+            throw error1;
+        }
 
-receive().catch(console.error);
+        var queue = 'hello';
+
+        channel.assertQueue(queue, {
+            durable: false
+        });
+
+        console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
+
+        channel.consume(queue, function(msg) {
+            console.log(" [x] Received %s", msg.content.toString());
+        }, {
+            noAck: true
+        });
+    });
+});
