@@ -1,6 +1,6 @@
 const amqplib = require('amqplib/callback_api');
 
-const queue = 'hello';
+const queue = 'log_queue';
 const option = {
     hostname: "127.0.0.1",
     username: "dev",
@@ -15,15 +15,22 @@ amqplib.connect(option, (err, conn) => {
     conn.createChannel((err, ch1) => {
         
         if (err) throw err;
-        
-        const msg = 'Hello world';
-        ch1.assertQueue(queue, {
+
+        const exchange = 'logs';
+        const msg = process.argv.slice(2).join(' ') || "Hello World!";
+
+        ch1.assertExchange(exchange, 'fanout', {
             durable: false
-        });
-        
-        // 메시지를 Buffer 객체로 변환
-        // Buffer.from(msg): 문자열을 바이너리 형식으로 인코딩 (RabbitMQ는 바이너리 형식을 요구)
-        ch1.sendToQueue(queue, Buffer.from(msg));
+        })
+
+        ch1.publish(exchange, '', Buffer.from(msg));
         console.log(" [x] Sent %s", msg);
+        
     });
+
+    setTimeout(() => {
+        conn.close();
+        process.exit(0);
+    }, 500);
+
 });
