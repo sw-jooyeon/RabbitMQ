@@ -1,0 +1,30 @@
+{
+  "name": "avocado",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sender": "node tutorials_archive/helloworld/sender.js",
+    "receiver": "node tutorials_archive/helloworld/receiver.js",
+    "new_task": "node tutorials_archive/workqueues/new_task.js",
+    "worker": "node tutorials_archive/workqueues/worker.js",
+    "emit_log": "node tutorials_archive/pubsub/emit_log.js",
+    "receive_logs": "node tutorials_archive/pubsub/receive_logs.js",
+    "emit_log_direct": "node tutorials_archive/routing/emit_log_direct.js",
+    "receive_logs_direct": "node tutorials_archive/routing/receive_logs_direct.js",
+    "emit_log_topic": "node tutorials_archive/topic/emit_log_topic.js",
+    "receive_logs_topic": "node tutorials_archive/topic/receive_logs_topic.js",
+    "rpc_server": "node tutorials_archive/rpc/rpc_server.js",
+    "rpc_client": "node tutorials_archive/rpc/rpc_client.js",
+    "all": "node project/all.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.8"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
