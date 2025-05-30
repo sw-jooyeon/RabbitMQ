@@ -1,6 +1,5 @@
 const amqplib = require('amqplib');
 
-const queue = 'rpc.send.msg'
 const option = {
     hostname: "127.0.0.1",
     username: "dev",
@@ -8,38 +7,40 @@ const option = {
     vhost: "development"
 }
 
-(async () => {
+class rpcServer {
 
-    try {
+    constructor(queue, handleMessage) {
+
+        this.queue = queue;
+        this.handleMessage = handleMessage;
+        this.channel = null;
+    }
+
+    async init() {
 
         const conn = await amqplib.connect(option);
-        const ch = await conn.createChannel();
+        const channel = await conn.createChannel();
+        this.channel = channel;
 
-        const { q } = await ch.assertQueue('', {
-            exclusive: true
+        await channel.assertQueue(this.queue, {
+            durable: false
         });
-        
-        ch.prefetch(1);
-        console.log(' [x] Awaiting RPC requests');
+        channel.prefetch(1);
 
-        ch.consume(q.queue, (msg) => {
+        channel.consume(this.queue, async (msg) => {
+            
+            console.log(' [x] Received ', msg.content.toString());
 
-            console.log(' [.] ', msg.content.toString());
+            const response = await this.handleMessage(msg.content.toString());
 
-            ch.sendToQueue(msg.properties.replyTo,
-                Buffer.from(msg.toString()), {
+            channel.sendToQueue(msg.properties.replyTo,
+                Buffer.from(response.toString()), {
                     correlationId: msg.properties.correlationId
                 });
 
-            ch.ack(msg);
-
+            channel.ack(msg);
         });
-
-
-    } catch (err) {
-
-        throw err;
-        process.exit(1);
     }
+}
 
-}) ();
+module.exports = rpcServer;

@@ -5,6 +5,8 @@ const startNotification = require('./notification');
 
 async function startAll() {
 
+    console.log('모든 서버를 실행합니다.');
+    
     await Promise.all([
 
         startApi(),
@@ -12,8 +14,6 @@ async function startAll() {
         startScheduler(),
         startNotification()
     ]);
-    
-    console.log('All servers started.');
 
 }
 

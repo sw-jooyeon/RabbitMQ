@@ -1,6 +1,5 @@
 const amqplib = require('amqplib');
 
-const queue = 'rpc.server.queue';
 const option = {
     hostname: "127.0.0.1",
     username: "dev",
@@ -8,7 +7,8 @@ const option = {
     vhost: "development"
 }
 
-async function rpcServer(response) {
+
+async function rpcServer(queue, handleMessage) {
 
     const conn = await amqplib.connect(option);
     const ch = await conn.createChannel();
@@ -22,10 +22,10 @@ async function rpcServer(response) {
 
         console.log(' [x] Received ', msg.content.toString());
 
-        response = await handleMessage(msg.content.toString());
+        const response = await handleMessage(msg.content.toString());
 
         ch.sendToQueue(msg.properties.replyTo,
-            Buffer.from(Response.toString()),
+            Buffer.from(response.toString()),
             {
                 correlationId: msg.properties.correlationId
             }

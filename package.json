@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node project/all.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "sender": "node tutorials_archive/helloworld/sender.js",
     "receiver": "node tutorials_archive/helloworld/receiver.js",
@@ -16,8 +17,7 @@
     "emit_log_topic": "node tutorials_archive/topic/emit_log_topic.js",
     "receive_logs_topic": "node tutorials_archive/topic/receive_logs_topic.js",
     "rpc_server": "node tutorials_archive/rpc/rpc_server.js",
-    "rpc_client": "node tutorials_archive/rpc/rpc_client.js",
-    "all": "node project/all.js"
+    "rpc_client": "node tutorials_archive/rpc/rpc_client.js"
   },
   "author": "",
   "license": "ISC",

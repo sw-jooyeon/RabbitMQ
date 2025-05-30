@@ -9,22 +9,17 @@ async function handleMessage(msg) {
 }
 
 async function startApi() {
+
+    await rpcServer('rpc.queue.api', handleMessage);
+
+    const ioClient = await rpcClient('rpc.queue.io');
+    const schedulerClient = await rpcClient('rpc.queue.scheduler');
+    const notificationClient = await rpcClient('rpc.queue.notification');
     
-    const server = new rpcServer('rpc.queue.api', handleMessage);
-    await server.init();
-
-    const ioClient = new rpcClient('rpc.queue.io');
-    const schedulerClient = new rpcClient('rpc.queue.scheduler');
-    const notificationClient = new rpcClient('rpc.queue.notification');
-
-    await ioClient.init();
-    await schedulerClient.init();
-    await notificationClient.init();
-
     async function createMsg() {
-        
-        const timestamp = new Date().toLocaleTimeString();
 
+        const timestamp = new Date().toLocaleTimeString();
+        
         const ioMsg = ` [api -> io] ${timestamp}`;
         const schedulerMsg = ` [api -> scheduler] ${timestamp}`;
         const notificationMsg = ` [api -> notification] ${timestamp}`;
@@ -37,6 +32,7 @@ async function startApi() {
     }
 
     createMsg();
+
 }
 
 module.exports = startApi;

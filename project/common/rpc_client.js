@@ -1,6 +1,5 @@
 const amqplib = require('amqplib');
 
-const queue = 'rpc.send.msg'
 const option = {
     hostname: "127.0.0.1",
     username: "dev",
@@ -8,46 +7,52 @@ const option = {
     vhost: "development"
 }
 
-async function rpcClient() {
+class rpcClient {
 
-    // 연결 및 채널 생성
-    const conn = await amqplib.connect(option);
-    const ch = await conn.createChannel();
+    constructor(queue) {
 
-    // 임시 큐 생성
-    const { q } = await ch.assertQueue('', {
-        exclusive: true
-    });
-    const replyQueue = q.queue;
-
-    // 메시지 도착
-    ch.consume(replyQueue, (msg) => {
-
-        if (msg.properties.correlationId === correlationId) { // correlationId가 일치하는 경우
-
-            console.log(' [.] Got ', msg.content.toString());
-
-        }
-
-    }, {noAck: true});
-
-    // 메시지 전송
-    async function call(targetQueue, msg) {
-
-        // correlationId 생성
-        const correlationId = generateUuid();
-
-        ch.sendToQueue(targetQueue,
-            Buffer.from(msg), {
-                correlationId: correlationId,
-                replyTo: replyQueue
-            });
-
-        return response;
-
+        this.queue = queue;
+        this.channel = null;
+        this.replyQueue = null;
+        this.correlationId = null;
     }
 
-    return {call};
+    async init() {
+
+        const conn = await amqplib.connect(option);
+        const channel = await conn.createChannel();
+        this.channel = channel;
+
+        const q = await channel.assertQueue('', {
+            exclusive: true
+        });
+        this.replyQueue = q.queue;
+
+        channel.consume(this.replyQueue, (msg) => {
+
+            if (msg.properties.correlationId === this.correlationId) {
+
+                console.log(' [.] Got ', msg.content.toString());
+            }
+
+        }, {
+            noAck: true
+        });
+        
+    }
+
+    sendMsg(msg) {
+
+        this.correlationId = generateUuid();
+
+        console.log(' [x] Send ', msg);
+
+        this.channel.sendToQueue(this.queue,
+            Buffer.from(msg), {
+                correlationId: this.correlationId,
+                replyTo: this.replyQueue
+            });
+    }
 
 }
 

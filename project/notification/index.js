@@ -1,19 +1,31 @@
-const rpc_client = require('../common/rpc_client');
-const rpc_server = require('../common/rpc_server');
+const rpcClient = require('../common/rpc_client');
+const rpcServer = require('../common/rpc_server');
+
+async function handleMessage(msg) {
+
+    const response = ` ${msg} 요청을 [notification]에서 받았습니다.`;
+    
+    return response;
+}
 
 async function startNotification() {
+    
+    const server = new rpcServer('rpc.queue.notification', handleMessage);
+    await server.init();
 
-    const server = new rpc_server('notification', async (msg) => {
+    const ioClient = new rpcClient('rpc.queue.io');
+    await ioClient.init();
 
-        console.log(' [notification] Received: ', msg);
-        return 'ack from notification';
-    });
+    async function createMsg() {
 
-    await server.start();
+        const timestamp = new Date().toLocaleTimeString();
+        const ioMsg = ` [notification -> io] ${timestamp}`;
+        ioClient.sendMsg(ioMsg);
 
-    const client = new rpc_client('notification');
-    await client.connect();
+        setTimeout(createMsg, 10000);
+    }
 
+    createMsg();
 }
 
 module.exports = startNotification;
